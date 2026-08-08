@@ -5,10 +5,16 @@ import { InspectorPanel } from './ui/InspectorPanel';
 import { Toolbar } from './ui/Toolbar';
 import { useEngine } from './engine/useEngine';
 import { useGraphStore, saveGraphToStorage } from './store/graphStore';
+import { useUiStore } from './store/uiStore';
 import './styles/global.css';
 
 export default function App() {
   useEngine();
+  const theme = useUiStore((s) => s.theme);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     const unsub = useGraphStore.subscribe(() => saveGraphToStorage());

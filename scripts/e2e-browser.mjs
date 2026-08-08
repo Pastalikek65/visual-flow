@@ -137,6 +137,29 @@ try {
   await page.keyboard.press('Control+z');
   await page.waitForTimeout(400);
 
+  console.log('» theme toggle');
+  const htmlTheme = () => page.evaluate(() => document.documentElement.dataset.theme ?? 'dark');
+  const startTheme = await htmlTheme();
+  await page.locator('.theme-toggle').click();
+  await page.waitForTimeout(200);
+  const afterToggle = await htmlTheme();
+  check('theme toggles', afterToggle !== startTheme, `start=${startTheme} after=${afterToggle}`);
+  await page.locator('.theme-toggle').click();
+  await page.waitForTimeout(200);
+  check('theme toggles back', (await htmlTheme()) === startTheme);
+
+  console.log('» zoom hud');
+  const zoomPct = page.locator('.hud-zoom-pct');
+  check('zoom hud visible', (await zoomPct.count()) === 1);
+  const pct = async () => Number((await zoomPct.textContent()).replace('%', ''));
+  check('initial zoom 100%', (await pct()) === 100, String(await pct()));
+  await page.locator('button[aria-label="zoom-in"]').click();
+  await page.waitForTimeout(200);
+  check('zoom in increases', (await pct()) > 100, String(await pct()));
+  await page.locator('button[aria-label="fit"]').click();
+  await page.waitForTimeout(200);
+  check('fit keeps nodes in view', (await pct()) > 0 && (await pct()) <= 100, String(await pct()));
+
   console.log('» text/concat graph via Import');
   const textGraph = {
     nodes: [

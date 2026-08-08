@@ -1,6 +1,9 @@
 import { toWire } from 'flow-types';
 import { useGraphStore } from '../store/graphStore';
 import { useEngineStore } from '../store/engineStore';
+import { useUiStore, type Theme } from '../store/uiStore';
+
+const THEME_LABEL: Record<Theme, string> = { dark: '🌙', light: '☀️' };
 
 export function Toolbar() {
   const status = useEngineStore((s) => s.status);
@@ -8,6 +11,8 @@ export function Toolbar() {
   const canRedo = useGraphStore((s) => s.future.length > 0);
   const hasClipboard = useGraphStore((s) => s.clipboard !== null);
   const canCopy = useGraphStore((s) => s.selection?.kind === 'node');
+  const theme = useUiStore((s) => s.theme);
+  const setTheme = useUiStore((s) => s.setTheme);
 
   const exportGraph = () => {
     const g = useGraphStore.getState();
@@ -76,6 +81,13 @@ export function Toolbar() {
             e.target.value = '';
           }}
         />
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          title={`Theme: ${theme}`}
+          className="theme-toggle"
+        >
+          {THEME_LABEL[theme]}
+        </button>
         <span className={`status status-${status}`}>{status}</span>
       </div>
     </header>

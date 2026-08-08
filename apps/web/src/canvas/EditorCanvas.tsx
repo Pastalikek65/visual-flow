@@ -26,7 +26,10 @@ export function EditorCanvas() {
   const setHover = useUiStore((s) => s.setHover);
 
   const screenToWorld = useCallback(
-    (cx: number, cy: number) => ({ x: (cx - view.x) / view.k, y: (cy - view.y) / view.k }),
+    (cx: number, cy: number, v: { x: number; y: number; k: number } = view) => ({
+      x: (cx - v.x) / v.k,
+      y: (cy - v.y) / v.k,
+    }),
     [view],
   );
 
@@ -56,6 +59,31 @@ export function EditorCanvas() {
     const k = Math.min(2.5, Math.max(0.2, view.k * (e.deltaY < 0 ? 1.1 : 1 / 1.1)));
     const w = screenToWorld(e.clientX, e.clientY);
     setView({ k, x: e.clientX - w.x * k, y: e.clientY - w.y * k });
+  };
+
+  const zoomBy = (factor: number) => {
+    setView((v) => {
+      const k = Math.min(2.5, Math.max(0.2, v.k * factor));
+      const w = screenToWorld(window.innerWidth / 2, window.innerHeight / 2, v);
+      return { k, x: window.innerWidth / 2 - w.x * k, y: window.innerHeight / 2 - w.y * k };
+    });
+  };
+
+  const fitAll = () => {
+    const g = useGraphStore.getState();
+    const entries = Object.values(g.nodes);
+    if (entries.length === 0) {
+      setView({ x: 40, y: 40, k: 1 });
+      return;
+    }
+    const minX = Math.min(...entries.map((n) => n.x));
+    const maxX = Math.max(...entries.map((n) => n.x + 220));
+    const minY = Math.min(...entries.map((n) => n.y));
+    const maxY = Math.max(...entries.map((n) => n.y + 140));
+    const w = viewRef.current?.clientWidth ?? 800;
+    const h = viewRef.current?.clientHeight ?? 600;
+    const k = Math.min(1.5, Math.max(0.3, Math.min(w / Math.max(1, maxX - minX), h / Math.max(1, maxY - minY))));
+    setView({ x: (w - (maxX - minX) * k) / 2 - minX * k, y: (h - (maxY - minY) * k) / 2 - minY * k, k });
   };
 
   const commitConnection = useCallback(() => {
@@ -126,6 +154,20 @@ export function EditorCanvas() {
         {Object.values(nodes).map((n) => (
           <NodeCard key={n.id} node={n} />
         ))}
+      </div>
+      <div className="canvas-hud">
+        <button onClick={() => zoomBy(1 / 1.2)} title="Zoom out" aria-label="zoom-out">
+          −
+        </button>
+        <button className="hud-zoom-pct" onClick={() => setView({ x: 40, y: 40, k: 1 })} title="Reset zoom (100%)">
+          {Math.round(view.k * 100)}%
+        </button>
+        <button onClick={() => zoomBy(1.2)} title="Zoom in" aria-label="zoom-in">
+          +
+        </button>
+        <button onClick={fitAll} title="Fit all nodes" aria-label="fit">
+          ⤢
+        </button>
       </div>
     </div>
   );

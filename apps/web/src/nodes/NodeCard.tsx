@@ -40,7 +40,7 @@ export const NodeCard = ({ node }: { node: FlowNode }) => {
         select({ kind: 'node', id: node.id });
       }}
     >
-      <div className="node-header" onPointerDown={onHeaderPointerDown}>
+      <div className="node-header" onPointerDown={onHeaderPointerDown} style={{ borderLeftColor: spec?.color }}>
         <span className="node-dot" style={{ background: spec?.color }} />
         <span className="node-kind">{spec?.label ?? node.kind}</span>
         <span className="node-id">{node.id}</span>

@@ -54,7 +54,7 @@ export function EdgeLayer({
             key={e.id}
             d={d}
             fill="none"
-            stroke={sel ? '#ef8354' : '#4a5568'}
+            stroke={sel ? 'var(--accent)' : 'var(--edge)'}
             strokeWidth={sel ? 3 : 2}
             style={{ pointerEvents: 'visibleStroke' }}
             onPointerDown={(ev) => {

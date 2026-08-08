@@ -3,11 +3,27 @@
   --panel: #151b26;
   --panel-2: #1b2330;
   --border: #26303f;
+  --border-soft: #1d2533;
   --text: #d9e1ef;
   --dim: #7c8799;
   --accent: #ef8354;
+  --edge: #4a5568;
   --radius: 8px;
   --font: 'SF Mono', 'Cascadia Mono', Consolas, 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #f4f6fb;
+  --panel: #ffffff;
+  --panel-2: #eef1f8;
+  --border: #d5dbe8;
+  --border-soft: #e6eaf3;
+  --text: #1c2333;
+  --dim: #66738c;
+  --accent: #d96a38;
+  --edge: #9aa5b8;
+  color-scheme: light;
 }
 
 * {
@@ -145,7 +161,7 @@ body {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 1px 1px, #1d2533 1px, transparent 0) 0 0 / 26px 26px,
+    radial-gradient(circle at 1px 1px, var(--border-soft) 1px, transparent 0) 0 0 / 26px 26px,
     var(--bg);
   cursor: grab;
 }
@@ -185,6 +201,7 @@ body {
   gap: 8px;
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
   cursor: move;
 }
 
@@ -285,6 +302,10 @@ body {
 
 .port-hover .port-dot {
   box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
+}
+
+:root[data-theme='light'] .port-hover .port-dot {
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.25);
 }
 
 /* ---------- params form ---------- */
@@ -413,4 +434,43 @@ body {
 
 .run-ms {
   color: var(--dim);
+}
+
+/* ---------- canvas hud ---------- */
+.canvas-hud {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  z-index: 5;
+}
+
+.canvas-hud button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-width: 30px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.canvas-hud button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.canvas-hud .hud-zoom-pct {
+  min-width: 52px;
+  font-size: 11px;
+  font-weight: 700;
 }
