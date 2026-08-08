@@ -303,6 +303,28 @@ try {
   check('output input detached', v['out'] === '∅', JSON.stringify(v));
   check('inspector cleared after remove', (await page.locator('.inspector-title', { hasText: 'Edge' }).count()) === 0);
 
+  console.log('» example gallery');
+  const galleryBtn = page.locator('.gallery-toggle').first();
+  check('gallery button visible', (await galleryBtn.count()) === 1);
+  await galleryBtn.click();
+  await page.waitForTimeout(300);
+  const cards = page.locator('.gallery-card');
+  check('gallery lists 4 examples', (await cards.count()) === 4, String(await cards.count()));
+  await cards.nth(0).click(); // °F → °C
+  await page.waitForTimeout(1200);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  check('example F->C loads (8 nodes)', v['o1'] === '25', JSON.stringify(v));
+  check('converter intermediate 45', v['s1'] === '45', JSON.stringify(v));
+
+  await galleryBtn.click();
+  await page.waitForTimeout(200);
+  await page.locator('.gallery-card').nth(2).click(); // text pipeline
+  await page.waitForTimeout(1200);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  check('text pipeline output', v['o1'] === 'HELLO UNIVERSE', JSON.stringify(v));
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {
