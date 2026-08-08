@@ -2,7 +2,7 @@
 
 A node-based dataflow graph editor built with **React + TypeScript**, executing its compute engine as **Rust compiled to WebAssembly** inside a dedicated Web Worker.
 
-> **Live demo:** <https://USERNAME.github.io/REPO/>  <!-- replace with your repository URL after first deploy -->
+> **Live demo:** <https://pastalikek65.github.io/visual-flow/>
 
 Create nodes by clicking or dragging them from the palette onto the canvas, connect output ports to input ports, and watch the Wasm engine recompute only the affected subgraph — the main thread never blocks.
 
@@ -14,7 +14,7 @@ The live build (GitHub Pages) automatically publishes from the `main` branch via
 
 1. Push to `main`.
 2. In your repo settings → Pages → Source → **GitHub Actions**.
-3. Demo URL: `https://<owner>.github.io/<repo>/`
+3. Demo URL: `https://pastalikek65.github.io/visual-flow/`
 
 ## Architecture
 
