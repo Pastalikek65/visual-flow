@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+target/
+wasm-gen/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+.vite/
+coverage/

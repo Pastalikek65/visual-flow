@@ -1,0 +1,35 @@
+{
+  "name": "visual-flow",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Node-based visual dataflow engine — React/TypeScript UI + Rust/WebAssembly compute core",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@9.2.0",
+  "scripts": {
+    "wasm:build": "bash scripts/build-wasm.sh",
+    "wasm:build:dev": "bash scripts/build-wasm.sh --dev",
+    "dev": "bash scripts/dev.sh",
+    "build": "bash scripts/build.sh",
+    "typecheck": "tsc --noEmit -p packages/flow-types && tsc --noEmit -p packages/flow-engine && tsc --noEmit -p apps/web",
+    "test:rust": "cargo test --workspace",
+    "test:ts": "vitest run",
+    "test": "npm run test:rust && npm run test:ts",
+    "check": "bash scripts/checks.sh"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0",
+    "vitest": "^2.1.8"
+  }
+}
