@@ -20,6 +20,10 @@ class FakeBus implements EngineBus {
       );
   }
 
+  boot() {
+    this.onmessage?.({ data: { id: -1, ok: true, result: 'worker booted' } } as MessageEvent<WorkerResponse>);
+  }
+
   terminate() {}
 }
 
@@ -34,6 +38,7 @@ describe('EngineBridge rpc', () => {
       throw new Error(`unexpected ${method}`);
     });
     const bridge = new EngineBridge(bus);
+    bus.boot();
     await bridge.open();
     await expect(bridge.canConnect('a', 'b')).resolves.toBe(true);
     bridge.dispose();
@@ -46,6 +51,7 @@ describe('EngineBridge rpc', () => {
       throw new Error('boom');
     });
     const bridge = new EngineBridge(bus);
+    bus.boot();
     await bridge.open();
     await expect(bridge.patch({})).rejects.toThrow('boom');
     bridge.dispose();
@@ -62,6 +68,7 @@ describe('EngineBridge rpc', () => {
       throw new Error(`unexpected ${method}`);
     });
     const bridge = new EngineBridge(bus);
+    bus.boot();
     await bridge.open();
     const dirty = await bridge.patch({ nodesAdded: [] });
     const result = await bridge.run();
@@ -82,6 +89,7 @@ describe('EngineBridge rpc', () => {
       throw new Error(`unexpected ${method}`);
     });
     const bridge = new EngineBridge(bus);
+    bus.boot();
     await bridge.open();
     const [a, b] = await Promise.all([bridge.query('x'), bridge.query('y')]);
     expect((a as { value: number }).value).toBe(42);

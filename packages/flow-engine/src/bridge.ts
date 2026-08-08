@@ -13,7 +13,14 @@ export class EngineBridge {
 
   constructor(bus: EngineBus) {
     this.bus = bus;
-    this.bus.onmessage = (ev) => this.handle(ev.data);
+    this.bus.onmessage = (ev) => {
+      const d = ev.data as { id: number; ok?: boolean } | undefined;
+      if (d && d.id === -1 && d.ok) {
+        this.bus.postMessage({ id: 0, method: 'init' });
+        return;
+      }
+      this.handle(ev.data);
+    };
     this.bus.onerror = (ev) => console.error('[engine] worker error', ev);
     this.ready = new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('worker init timeout')), 10_000);
@@ -28,7 +35,6 @@ export class EngineBridge {
         },
       });
     });
-    this.bus.postMessage({ id: 0, method: 'init' });
   }
 
   private handle(res: WorkerResponse) {

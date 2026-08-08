@@ -1,5 +1,4 @@
 import { FlowEngine } from './wasm-gen/flow_core';
-import type { NodeValue } from 'flow-types';
 import type { WireGraphData, WirePatchData } from 'flow-types';
 
 let engine: FlowEngine | undefined;
