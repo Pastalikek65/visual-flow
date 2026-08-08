@@ -6,6 +6,7 @@ type Params = BTreeMap<String, serde_json::Value>;
 pub enum Value {
     Number(f64),
     Bool(bool),
+    Str(String),
     Null,
 }
 
@@ -14,6 +15,7 @@ impl Value {
         match self {
             Value::Number(_) => "number",
             Value::Bool(_) => "bool",
+            Value::Str(_) => "string",
             Value::Null => "null",
         }
     }
@@ -28,6 +30,7 @@ impl Value {
                     0.0
                 }
             }
+            Value::Str(s) => s.parse::<f64>().unwrap_or(0.0),
             Value::Null => 0.0,
         }
     }
@@ -36,6 +39,7 @@ impl Value {
         match self {
             Value::Bool(b) => *b,
             Value::Number(n) => *n != 0.0,
+            Value::Str(s) => !s.is_empty(),
             Value::Null => false,
         }
     }
@@ -46,6 +50,7 @@ impl Value {
                 serde_json::json!({ "type": "number", "value": Self::number_json(*n) })
             }
             Value::Bool(b) => serde_json::json!({ "type": "bool", "value": b }),
+            Value::Str(s) => serde_json::json!({ "type": "string", "value": s }),
             Value::Null => serde_json::json!({ "type": "null" }),
         }
     }
@@ -82,6 +87,14 @@ impl<'a> NodeCtx<'a> {
         }
     }
 
+    pub fn input_str(&self, index: usize, default: &str) -> String {
+        match self.inputs.get(index) {
+            Some(Value::Str(s)) => s.clone(),
+            Some(other) => other.as_f64().to_string(),
+            None => default.to_string(),
+        }
+    }
+
     pub fn param_f64(&self, key: &str, default: f64) -> f64 {
         match self.params.get(key) {
             Some(serde_json::Value::Number(n)) => n.as_f64().unwrap_or(default),
@@ -100,6 +113,14 @@ impl<'a> NodeCtx<'a> {
         match self.params.get(key) {
             Some(serde_json::Value::Bool(b)) => *b,
             _ => default,
+        }
+    }
+
+    pub fn param_str(&self, key: &str, default: &str) -> String {
+        match self.params.get(key) {
+            Some(serde_json::Value::String(s)) => s.clone(),
+            Some(serde_json::Value::Number(n)) => n.as_f64().unwrap_or(0.0).to_string(),
+            _ => default.to_string(),
         }
     }
 }

@@ -1,17 +1,17 @@
-export type PortKind = 'number' | 'bool' | 'any';
+export type PortKind = 'number' | 'bool' | 'string' | 'any';
 
 export interface PortDef {
   name: string;
   kind: PortKind;
 }
 
-export type ParamType = 'number' | 'bool';
+export type ParamType = 'number' | 'bool' | 'text';
 
 export interface ParamDef {
   key: string;
   label: string;
   type: ParamType;
-  default: number | boolean;
+  default: number | boolean | string;
   min?: number;
   max?: number;
   step?: number;
@@ -20,7 +20,7 @@ export interface ParamDef {
 export interface NodeSpec {
   id: string;
   label: string;
-  category: 'math' | 'logic' | 'io';
+  category: 'math' | 'logic' | 'io' | 'text';
   color: string;
   inputs: PortDef[];
   outputs: PortDef[];

@@ -20,28 +20,41 @@ pub struct Registry {
 impl Registry {
     pub fn builtin() -> Self {
         Registry {
-            kinds: &[
-                ("add", &MathNode::Add),
-                ("sub", &MathNode::Sub),
-                ("mul", &MathNode::Mul),
-                ("div", &MathNode::Div),
-                ("pow", &MathNode::Pow),
-                ("sin", &MathNode::Sin),
-                ("cos", &MathNode::Cos),
-                ("min", &MathNode::Min),
-                ("max", &MathNode::Max),
-                ("and", &LogicNode::And),
-                ("or", &LogicNode::Or),
-                ("not", &LogicNode::Not),
-                ("equal", &LogicNode::Equal),
-                ("greater", &LogicNode::Greater),
-                ("less", &LogicNode::Less),
-                ("ge", &LogicNode::Ge),
-                ("ifelse", &LogicNode::IfElse),
-                ("constant", &io::Constant),
-                ("slider", &io::Slider),
-                ("output", &io::Output),
-            ],
+kinds: &[
+            ("add", &MathNode::Add),
+            ("sub", &MathNode::Sub),
+            ("mul", &MathNode::Mul),
+            ("div", &MathNode::Div),
+            ("pow", &MathNode::Pow),
+            ("sin", &MathNode::Sin),
+            ("cos", &MathNode::Cos),
+            ("tan", &MathNode::Tan),
+            ("min", &MathNode::Min),
+            ("max", &MathNode::Max),
+            ("abs", &MathNode::Abs),
+            ("sqrt", &MathNode::Sqrt),
+            ("log", &MathNode::Log),
+            ("floor", &MathNode::Floor),
+            ("ceil", &MathNode::Ceil),
+            ("round", &MathNode::Round),
+            ("and", &LogicNode::And),
+            ("or", &LogicNode::Or),
+            ("not", &LogicNode::Not),
+            ("equal", &LogicNode::Equal),
+            ("greater", &LogicNode::Greater),
+            ("less", &LogicNode::Less),
+            ("ge", &LogicNode::Ge),
+            ("ifelse", &LogicNode::IfElse),
+            ("constant", &io::Constant),
+            ("slider", &io::Slider),
+            ("output", &io::Output),
+            ("text", &Text),
+            ("concat", &Concat),
+            ("uppercase", &Uppercase),
+            ("lowercase", &Lowercase),
+            ("length", &Length),
+            ("stringify", &Stringify),
+        ],
         }
     }
 
@@ -63,8 +76,23 @@ pub enum MathNode {
     Pow,
     Sin,
     Cos,
+    Tan,
     Min,
     Max,
+    Abs,
+    Sqrt,
+    Log,
+    Floor,
+    Ceil,
+    Round,
+}
+
+// Single-input math nodes (kind "number" -> "number")
+fn single_spec() -> [PortSpec; 1] {
+    [PortSpec {
+        name: "x",
+        kind: "number",
+    }]
 }
 
 impl NodeImpl for MathNode {
@@ -77,37 +105,52 @@ impl NodeImpl for MathNode {
             MathNode::Pow => "Power",
             MathNode::Sin => "Sine",
             MathNode::Cos => "Cosine",
+            MathNode::Tan => "Tangent",
             MathNode::Min => "Min",
             MathNode::Max => "Max",
+            MathNode::Abs => "Abs",
+            MathNode::Sqrt => "Square Root",
+            MathNode::Log => "Log",
+            MathNode::Floor => "Floor",
+            MathNode::Ceil => "Ceil",
+            MathNode::Round => "Round",
         }
     }
 
     fn inputs(&self) -> &'static [PortSpec] {
+        use std::sync::OnceLock;
+        static SINGLE: OnceLock<[PortSpec; 1]> = OnceLock::new();
+        static ADD: OnceLock<[PortSpec; 2]> = OnceLock::new();
+        static POW: OnceLock<[PortSpec; 2]> = OnceLock::new();
         match self {
-            MathNode::Pow => &[
-                PortSpec {
-                    name: "base",
-                    kind: "number",
-                },
-                PortSpec {
-                    name: "exp",
-                    kind: "number",
-                },
-            ],
-            MathNode::Sin | MathNode::Cos => &[PortSpec {
-                name: "x",
-                kind: "number",
-            }],
-            _ => &[
-                PortSpec {
-                    name: "a",
-                    kind: "number",
-                },
-                PortSpec {
-                    name: "b",
-                    kind: "number",
-                },
-            ],
+            MathNode::Pow => POW.get_or_init(|| {
+                [
+                    PortSpec {
+                        name: "base",
+                        kind: "number",
+                    },
+                    PortSpec {
+                        name: "exp",
+                        kind: "number",
+                    },
+                ]
+            }),
+            MathNode::Sin | MathNode::Cos | MathNode::Tan | MathNode::Abs | MathNode::Sqrt
+            | MathNode::Log | MathNode::Floor | MathNode::Ceil | MathNode::Round => {
+                SINGLE.get_or_init(single_spec)
+            }
+            _ => ADD.get_or_init(|| {
+                [
+                    PortSpec {
+                        name: "a",
+                        kind: "number",
+                    },
+                    PortSpec {
+                        name: "b",
+                        kind: "number",
+                    },
+                ]
+            }),
         }
     }
 
@@ -128,8 +171,15 @@ impl NodeImpl for MathNode {
             MathNode::Pow => one(ctx, 0).powf(one(ctx, 1)),
             MathNode::Sin => one(ctx, 0).sin(),
             MathNode::Cos => one(ctx, 0).cos(),
+            MathNode::Tan => one(ctx, 0).tan(),
             MathNode::Min => one(ctx, 0).min(one(ctx, 1)),
             MathNode::Max => one(ctx, 0).max(one(ctx, 1)),
+            MathNode::Abs => one(ctx, 0).abs(),
+            MathNode::Sqrt => one(ctx, 0).sqrt(),
+            MathNode::Log => one(ctx, 0).ln(),
+            MathNode::Floor => one(ctx, 0).floor(),
+            MathNode::Ceil => one(ctx, 0).ceil(),
+            MathNode::Round => one(ctx, 0).round(),
         };
         Value::Number(out)
     }
@@ -239,3 +289,6 @@ impl NodeImpl for LogicNode {
 }
 
 mod io;
+mod text;
+
+use self::text::{Concat, Length, Lowercase, Stringify, Text, Uppercase};

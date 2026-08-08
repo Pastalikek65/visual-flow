@@ -3,7 +3,7 @@ import type { FlowEdge, FlowNode, FlowGraph } from './graph';
 export interface WireNode {
   id: string;
   kind: string;
-  params: Record<string, boolean | number>;
+  params: Record<string, boolean | number | string>;
   x: number;
   y: number;
 }
@@ -34,7 +34,7 @@ export function toWire(g: FlowGraph): WireGraphData {
     nodes: Object.values(g.nodes).map((n) => ({
       id: n.id,
       kind: n.kind,
-      params: n.params as Record<string, boolean | number>,
+      params: n.params as Record<string, boolean | number | string>,
       x: n.x,
       y: n.y,
     })),
@@ -60,7 +60,7 @@ export function diff(prev: FlowGraph, next: FlowGraph): WirePatchData {
     patch.nodesChanged = changed.map((id) => ({
       id,
       kind: next.nodes[id].kind,
-      params: next.nodes[id].params as Record<string, boolean | number>,
+      params: next.nodes[id].params as Record<string, boolean | number | string>,
       x: next.nodes[id].x,
       y: next.nodes[id].y,
     }));
@@ -71,7 +71,7 @@ export function diff(prev: FlowGraph, next: FlowGraph): WirePatchData {
     patch.nodesAdded = addedNodes.map((id) => ({
       id,
       kind: next.nodes[id].kind,
-      params: next.nodes[id].params as Record<string, boolean | number>,
+      params: next.nodes[id].params as Record<string, boolean | number | string>,
       x: next.nodes[id].x,
       y: next.nodes[id].y,
     }));
@@ -84,6 +84,19 @@ export function diff(prev: FlowGraph, next: FlowGraph): WirePatchData {
 
   const edgesRemoved = Object.keys(prev.edges).filter((id) => !next.edges[id]);
   if (edgesRemoved.length) patch.edgesRemoved = edgesRemoved;
+
+  const edgesRewired = Object.keys(next.edges).filter(
+    (id) =>
+      prev.edges[id] &&
+      (prev.edges[id].from !== next.edges[id].from ||
+        prev.edges[id].to !== next.edges[id].to ||
+        prev.edges[id].fromPort !== next.edges[id].fromPort ||
+        prev.edges[id].toPort !== next.edges[id].toPort),
+  );
+  if (edgesRewired.length) {
+    patch.edgesRemoved = [...(patch.edgesRemoved ?? []), ...edgesRewired];
+    patch.edgesAdded = [...(patch.edgesAdded ?? []), ...edgesRewired.map((id) => next.edges[id])];
+  }
 
   return patch;
 }

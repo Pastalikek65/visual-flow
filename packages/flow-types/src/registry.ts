@@ -3,9 +3,11 @@ import type { NodeSpec } from './node';
 const math = '#34d399';
 const logic = '#a78bfa';
 const io = '#fbbf24';
+const text = '#60a5fa';
 
 const N = (name: string): NodeSpec['inputs'][number] => ({ name, kind: 'number' });
 const B = (name: string): NodeSpec['inputs'][number] => ({ name, kind: 'bool' });
+const S = (name: string): NodeSpec['inputs'][number] => ({ name, kind: 'string' });
 const A = (name: string): NodeSpec['inputs'][number] => ({ name, kind: 'any' });
 
 export const REGISTRY: NodeSpec[] = [
@@ -24,6 +26,13 @@ export const REGISTRY: NodeSpec[] = [
   { id: 'pow', label: 'Power', category: 'math', color: math, inputs: [N('base'), N('exp')], outputs: [N('out')], params: [] },
   { id: 'sin', label: 'Sine', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
   { id: 'cos', label: 'Cosine', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'tan', label: 'Tangent', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'abs', label: 'Abs', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'sqrt', label: 'Square Root', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'log', label: 'Log', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'floor', label: 'Floor', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'ceil', label: 'Ceil', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'round', label: 'Round', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
   { id: 'min', label: 'Min', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
   { id: 'max', label: 'Max', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
   { id: 'and', label: 'AND', category: 'logic', color: logic, inputs: [B('a'), B('b')], outputs: [B('out')], params: [] },
@@ -39,6 +48,12 @@ export const REGISTRY: NodeSpec[] = [
     outputs: [N('out')],
     params: [],
   },
+  { id: 'text', label: 'Text', category: 'text', color: text, inputs: [], outputs: [S('value')], params: [{ key: 'text', label: 'Text', type: 'text', default: '' }] },
+  { id: 'concat', label: 'Concat', category: 'text', color: text, inputs: [S('a'), S('b')], outputs: [S('out')], params: [] },
+  { id: 'uppercase', label: 'Uppercase', category: 'text', color: text, inputs: [S('text')], outputs: [S('out')], params: [] },
+  { id: 'lowercase', label: 'Lowercase', category: 'text', color: text, inputs: [S('text')], outputs: [S('out')], params: [] },
+  { id: 'length', label: 'Length', category: 'text', color: text, inputs: [S('text')], outputs: [N('out')], params: [] },
+  { id: 'stringify', label: 'To String', category: 'text', color: text, inputs: [A('in')], outputs: [S('out')], params: [] },
 ];
 
 export function specFor(kind: string): NodeSpec | undefined {

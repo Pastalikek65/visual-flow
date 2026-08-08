@@ -5,6 +5,7 @@ import { useUiStore } from '../store/uiStore';
 const KIND_COLOR: Record<string, string> = {
   number: '#34d399',
   bool: '#a78bfa',
+  string: '#60a5fa',
   any: '#f8fafc',
 };
 

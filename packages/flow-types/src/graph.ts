@@ -24,6 +24,7 @@ export interface FlowGraph {
 export type NodeValue =
   | { type: 'number'; value: number | 'NaN' | 'inf' | '-inf' }
   | { type: 'bool'; value: boolean }
+  | { type: 'string'; value: string }
   | { type: 'null' };
 
 export function uid(prefix: string): string {

@@ -7,6 +7,8 @@ export function formatValue(v: NodeValue | undefined): string {
       return String(v.value ?? 0);
     case 'bool':
       return String(v.value);
+    case 'string':
+      return v.value;
     default:
       return '∅';
   }

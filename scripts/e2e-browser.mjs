@@ -137,6 +137,51 @@ try {
   await page.keyboard.press('Control+z');
   await page.waitForTimeout(400);
 
+  console.log('» text/concat graph via Import');
+  const textGraph = {
+    nodes: [
+      { id: 't1', kind: 'text', params: { text: 'Hello' }, x: 40, y: 40 },
+      { id: 't2', kind: 'text', params: { text: ' world' }, x: 40, y: 160 },
+      { id: 'cc1', kind: 'concat', params: {}, x: 240, y: 100 },
+      { id: 'u1', kind: 'uppercase', params: {}, x: 440, y: 40 },
+      { id: 'l1', kind: 'lowercase', params: {}, x: 440, y: 160 },
+      { id: 'ln1', kind: 'length', params: {}, x: 640, y: 100 },
+      { id: 'o1', kind: 'output', params: {}, x: 820, y: 60 },
+    ],
+    edges: [
+      { id: 'e1', from: 't1', fromPort: 'value', to: 'cc1', toPort: 'a' },
+      { id: 'e2', from: 't2', fromPort: 'value', to: 'cc1', toPort: 'b' },
+      { id: 'e3', from: 'cc1', fromPort: 'out', to: 'u1', toPort: 'text' },
+      { id: 'e4', from: 'cc1', fromPort: 'out', to: 'l1', toPort: 'text' },
+      { id: 'e5', from: 'cc1', fromPort: 'out', to: 'ln1', toPort: 'text' },
+      { id: 'e6', from: 'u1', fromPort: 'out', to: 'o1', toPort: 'in' },
+    ],
+  };
+  await page.locator('#file-import').setInputFiles({
+    name: 'text-graph.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(textGraph)),
+  });
+  await page.waitForTimeout(1200);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  check('concat=Hello world', v['cc1'] === 'Hello world', JSON.stringify(v));
+  check('uppercase=HELLO WORLD', v['u1'] === 'HELLO WORLD', JSON.stringify(v));
+  check('lowercase=hello world', v['l1'] === 'hello world', JSON.stringify(v));
+  check('length=11', v['ln1'] === '11', JSON.stringify(v));
+  check('out=HELLO WORLD', v['o1'] === 'HELLO WORLD', JSON.stringify(v));
+
+  console.log('» text node param edit');
+  await page.locator('.node-id', { hasText: 't1' }).click();
+  await page.waitForTimeout(300);
+  const textInput = page.locator('input[type=text]').first();
+  check('text param input exists', (await textInput.count()) === 1);
+  await textInput.fill('Hi');
+  await page.waitForTimeout(800);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  check('concat=Hi world', v['cc1'] === 'Hi world', JSON.stringify(v));
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {

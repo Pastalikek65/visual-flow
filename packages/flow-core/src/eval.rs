@@ -323,4 +323,73 @@ mod tests {
         let out = engine.run().unwrap();
         assert_eq!(out["a"]["value"], json!(9.0));
     }
+
+    #[test]
+    fn text_nodes_concat_uppercase_length() {
+        let mut engine = Engine::new();
+        engine
+            .set_graph(
+                r#"{"nodes":[
+                    {"id":"t1","kind":"text","params":{"text":"Hello"}},
+                    {"id":"t2","kind":"text","params":{"text":" world"}},
+                    {"id":"c","kind":"concat","params":{}},
+                    {"id":"u","kind":"uppercase","params":{}},
+                    {"id":"l","kind":"lowercase","params":{}},
+                    {"id":"n","kind":"length","params":{}}
+                ],"edges":[
+                    {"id":"e1","from":"t1","to":"c","from_port":"value","to_port":"a"},
+                    {"id":"e2","from":"t2","to":"c","from_port":"value","to_port":"b"},
+                    {"id":"e3","from":"c","to":"u","from_port":"out","to_port":"text"},
+                    {"id":"e4","from":"c","to":"l","from_port":"out","to_port":"text"},
+                    {"id":"e5","from":"c","to":"n","from_port":"out","to_port":"text"}
+                ]}"#,
+            )
+            .unwrap();
+        let out = engine.run().unwrap();
+        assert_eq!(out["c"]["value"], json!("Hello world"));
+        assert_eq!(out["u"]["value"], json!("HELLO WORLD"));
+        assert_eq!(out["l"]["value"], json!("hello world"));
+        assert_eq!(out["n"]["value"], json!(11.0));
+    }
+
+    #[test]
+    fn stringify_coerces_numbers() {
+        let mut engine = Engine::new();
+        engine
+            .set_graph(
+                r#"{"nodes":[
+                    {"id":"a","kind":"constant","params":{"value":42.0}},
+                    {"id":"s","kind":"stringify","params":{}}
+                ],"edges":[
+                    {"id":"e1","from":"a","to":"s","from_port":"out","to_port":"in"}
+                ]}"#,
+            )
+            .unwrap();
+        let out = engine.run().unwrap();
+        assert_eq!(out["s"]["value"], json!("42"));
+    }
+}
+
+#[cfg(test)]
+mod camelcase_tests {
+    use super::*;
+
+    #[test]
+    fn patch_import_camelcase_edges_concat() {
+        let mut engine = Engine::new();
+        let patch_json = r#"{"nodes_added":[
+            {"id":"t1","kind":"text","params":{"text":"Hello"}},
+            {"id":"t2","kind":"text","params":{"text":" world"}},
+            {"id":"c","kind":"concat","params":{}}
+        ],"edges_added":[
+            {"id":"e1","from":"t1","to":"c","fromPort":"value","toPort":"a"},
+            {"id":"e2","from":"t2","to":"c","fromPort":"value","toPort":"b"}
+        ]}"#;
+        let dirty = engine.patch_graph(patch_json).unwrap();
+        println!("dirty: {dirty:?}");
+        assert!(dirty.contains(&"t1".to_string()));
+        let out = engine.run().unwrap();
+        println!("out: {out}");
+        assert_eq!(out["c"]["value"], serde_json::json!("Hello world"));
+    }
 }

@@ -25,6 +25,18 @@ export function NodeParams({ node, spec }: { node: FlowNode; spec: NodeSpec | un
             </label>
           );
         }
+        if (p.type === 'text') {
+          return (
+            <label key={p.key} className="field field-text">
+              <span>{p.label}</span>
+              <input
+                type="text"
+                value={typeof value === 'string' ? value : String(p.default ?? '')}
+                onChange={(e) => setParam(node.id, p.key, e.target.value)}
+              />
+            </label>
+          );
+        }
         const num = typeof value === 'number' && isFinite(value) ? value : Number(p.default);
         return (
           <label key={p.key} className="field field-number">

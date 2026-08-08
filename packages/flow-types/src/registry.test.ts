@@ -5,7 +5,7 @@ import { portCompatible } from './node';
 describe('registry', () => {
   it('contains the full builtin node set', () => {
     const ids = REGISTRY.map((s) => s.id);
-    for (const expected of ['add', 'sub', 'mul', 'div', 'pow', 'sin', 'cos', 'min', 'max', 'and', 'or', 'not', 'equal', 'greater', 'less', 'ge', 'ifelse', 'constant', 'slider', 'output']) {
+    for (const expected of ['add', 'sub', 'mul', 'div', 'pow', 'sin', 'cos', 'tan', 'abs', 'sqrt', 'log', 'floor', 'ceil', 'round', 'min', 'max', 'and', 'or', 'not', 'equal', 'greater', 'less', 'ge', 'ifelse', 'constant', 'slider', 'output', 'text', 'concat', 'uppercase', 'lowercase', 'length', 'stringify']) {
       expect(ids).toContain(expected);
     }
   });
@@ -23,8 +23,16 @@ describe('registry', () => {
   it('port compatibility rules', () => {
     expect(portCompatible('number', 'number')).toBe(true);
     expect(portCompatible('bool', 'bool')).toBe(true);
+    expect(portCompatible('string', 'string')).toBe(true);
+    expect(portCompatible('string', 'number')).toBe(false);
     expect(portCompatible('number', 'bool')).toBe(false);
     expect(portCompatible('any', 'number')).toBe(true);
     expect(portCompatible('number', 'any')).toBe(true);
+  });
+
+  it('text category specs have expected ports', () => {
+    expect(specFor('concat')?.inputs.map((p) => p.kind)).toEqual(['string', 'string']);
+    expect(specFor('length')?.outputs[0].kind).toBe('number');
+    expect(specFor('text')?.params[0]).toMatchObject({ key: 'text', type: 'text' });
   });
 });

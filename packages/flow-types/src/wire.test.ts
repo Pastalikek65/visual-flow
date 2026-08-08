@@ -49,4 +49,29 @@ describe('wire diff', () => {
     expect(wire.edges[0].from).toBe('a');
     expect(wire.nodes.find((n) => n.id === 'a')?.params['v']).toBe(3);
   });
+
+  it('rewires edges with reused ids as remove+add', () => {
+    const prev: FlowGraph = {
+      nodes: { a: node('a'), b: node('b'), c: node('c') },
+      edges: { e1: edge('e1', 'a', 'b') },
+    };
+    const next: FlowGraph = {
+      nodes: { a: node('a'), b: node('b'), c: node('c') },
+      edges: { e1: edge('e1', 'b', 'c') },
+    };
+    const p = diff(prev, next);
+    expect(p.edgesRemoved).toEqual(['e1']);
+    expect(p.edgesAdded).toHaveLength(1);
+    expect(p.edgesAdded![0].to).toBe('c');
+  });
+
+  it('does not rewrite identical edges', () => {
+    const g: FlowGraph = {
+      nodes: { a: node('a'), b: node('b') },
+      edges: { e1: edge('e1', 'a', 'b') },
+    };
+    const p = diff(g, g);
+    expect(p.edgesAdded).toBeUndefined();
+    expect(p.edgesRemoved).toBeUndefined();
+  });
 });
