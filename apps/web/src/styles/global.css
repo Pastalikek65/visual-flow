@@ -490,6 +490,38 @@ body {
   background: rgba(239, 68, 68, 0.25);
 }
 
+/* ---------- minimap ---------- */
+.minimap {
+  position: absolute;
+  right: 14px;
+  bottom: 64px;
+  z-index: 20;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  cursor: crosshair;
+  user-select: none;
+}
+
+.minimap-svg {
+  display: block;
+}
+
+.minimap-edge {
+  stroke: var(--border-strong, #475569);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.minimap-viewport {
+  fill: transparent;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+}
+
 /* ---------- status ---------- */
 .status {
   font-size: 11px;
@@ -533,7 +565,7 @@ body {
   border-radius: var(--radius);
   padding: 4px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  z-index: 5;
+  z-index: 30;
 }
 
 .canvas-hud button {

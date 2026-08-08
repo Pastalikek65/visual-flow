@@ -325,6 +325,20 @@ try {
   console.log('  values:', JSON.stringify(v));
   check('text pipeline output', v['o1'] === 'HELLO UNIVERSE', JSON.stringify(v));
 
+  console.log('» minimap');
+  const mini = page.locator('.minimap');
+  check('minimap visible', (await mini.count()) === 1);
+  const miniNodeRects = await page.locator('.minimap rect[data-id]').count();
+  check('minimap draws node rects', miniNodeRects >= 6, `rects=${miniNodeRects}`);
+  const viewportRect = await page.locator('.minimap .minimap-viewport').count();
+  check('minimap viewport indicator', viewportRect === 1, `vp=${viewportRect}`);
+  const worldT0 = await page.evaluate(() => document.querySelector('.world')?.style.transform ?? '');
+  const mb = await mini.boundingBox();
+  await page.mouse.click(mb.x + mb.width * 0.78, mb.y + mb.height * 0.72);
+  await page.waitForTimeout(300);
+  const worldT1 = await page.evaluate(() => document.querySelector('.world')?.style.transform ?? '');
+  check('minimap click pans canvas', worldT0 !== worldT1, `${worldT0} -> ${worldT1}`);
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {

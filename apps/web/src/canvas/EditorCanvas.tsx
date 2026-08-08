@@ -6,6 +6,7 @@ import { cycleCheck } from '../editors/validation';
 import { EdgeLayer } from './EdgeLayer';
 import { NodeCard } from '../nodes/NodeCard';
 import { portWorldPos } from './geometry';
+import { Minimap } from './Minimap';
 
 export function EditorCanvas() {
   const viewRef = useRef<HTMLDivElement>(null);
@@ -85,6 +86,14 @@ export function EditorCanvas() {
     const k = Math.min(1.5, Math.max(0.3, Math.min(w / Math.max(1, maxX - minX), h / Math.max(1, maxY - minY))));
     setView({ x: (w - (maxX - minX) * k) / 2 - minX * k, y: (h - (maxY - minY) * k) / 2 - minY * k, k });
   };
+
+  const jumpTo = useCallback((wx: number, wy: number) => {
+    setView((v) => ({
+      ...v,
+      x: (viewRef.current?.clientWidth ?? 800) / 2 - wx * v.k,
+      y: (viewRef.current?.clientHeight ?? 600) / 2 - wy * v.k,
+    }));
+  }, []);
 
   const commitConnection = useCallback(() => {
     if (!drag) return;
@@ -185,6 +194,15 @@ export function EditorCanvas() {
           ⤢
         </button>
       </div>
+      <Minimap
+        nodes={nodes}
+        edges={edges}
+        specs={specs}
+        view={view}
+        canvasW={viewRef.current?.clientWidth ?? 800}
+        canvasH={viewRef.current?.clientHeight ?? 600}
+        onJump={jumpTo}
+      />
     </div>
   );
 }
