@@ -101,6 +101,15 @@ try {
   check('mul=65', v['mul1'] === '65', JSON.stringify(v));
   check('out=65', v['out1'] === '65', JSON.stringify(v));
 
+  console.log('» persistence: reload');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  check('restored slider=5', v['s1'] === '5', JSON.stringify(v));
+  check('restored mul=65', v['mul1'] === '65', JSON.stringify(v));
+  check('restored out=65', v['out1'] === '65', JSON.stringify(v));
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {

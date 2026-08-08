@@ -59,9 +59,32 @@ function demoGraph(): ReturnType<typeof demoState> {
   return demoState();
 }
 
+const STORAGE_KEY = 'visual-flow:graph:v1';
+
+export function saveGraphToStorage() {
+  try {
+    const s = useGraphStore.getState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ nodes: s.nodes, edges: s.edges }));
+  } catch {
+    // storage unavailable (private mode, quota)
+  }
+}
+
+export function loadGraphFromStorage(): { nodes: Record<string, FlowNode>; edges: Record<string, FlowEdge> } | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || !parsed.nodes || !parsed.edges) return null;
+    return { nodes: parsed.nodes, edges: parsed.edges };
+  } catch {
+    return null;
+  }
+}
+
 export const useGraphStore = create<GraphState>()((set, get) => ({
-  nodes: demoGraph().nodes,
-  edges: demoGraph().edges,
+  nodes: loadGraphFromStorage()?.nodes ?? demoGraph().nodes,
+  edges: loadGraphFromStorage()?.edges ?? demoGraph().edges,
   selection: null,
 
   addNode(kind, x, y) {

@@ -4,11 +4,16 @@ import { NodePalette } from './ui/NodePalette';
 import { InspectorPanel } from './ui/InspectorPanel';
 import { Toolbar } from './ui/Toolbar';
 import { useEngine } from './engine/useEngine';
-import { useGraphStore } from './store/graphStore';
+import { useGraphStore, saveGraphToStorage } from './store/graphStore';
 import './styles/global.css';
 
 export default function App() {
   useEngine();
+
+  useEffect(() => {
+    const unsub = useGraphStore.subscribe(() => saveGraphToStorage());
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
