@@ -58,3 +58,33 @@ jobs:
 
       - name: wasm bridge smoke (node)
         run: npm run test:wasm
+
+  browser:
+    name: Browser e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version 0.2.127 --locked
+
+      - run: npm ci
+      - run: npm run wasm:build
+
+      - name: build web app
+        run: cd apps/web && npx vite build
+
+      - name: install chromium
+        run: npx playwright-core install chromium
+
+      - name: browser smoke
+        run: node scripts/e2e-browser.mjs
