@@ -4,6 +4,10 @@ import { useEngineStore } from '../store/engineStore';
 
 export function Toolbar() {
   const status = useEngineStore((s) => s.status);
+  const canUndo = useGraphStore((s) => s.past.length > 0);
+  const canRedo = useGraphStore((s) => s.future.length > 0);
+  const hasClipboard = useGraphStore((s) => s.clipboard !== null);
+  const canCopy = useGraphStore((s) => s.selection?.kind === 'node');
 
   const exportGraph = () => {
     const g = useGraphStore.getState();
@@ -25,7 +29,7 @@ export function Toolbar() {
         const wire = JSON.parse(text);
         const nodes = Object.fromEntries(wire.nodes.map((n: { id: string }) => [n.id, n]));
         const edges = Object.fromEntries(wire.edges.map((e: { id: string }) => [e.id, e]));
-        useGraphStore.setState({ nodes, edges, selection: null });
+        useGraphStore.getState().replaceGraph(nodes, edges);
       })
       .catch((err) => useEngineStore.getState().setError(String(err)));
   };
@@ -38,6 +42,26 @@ export function Toolbar() {
         <span className="brand-sub">Rust · Wasm · React</span>
       </div>
       <div className="toolbar-actions">
+        <button onClick={() => useGraphStore.getState().undo()} disabled={!canUndo} title="Undo (Ctrl+Z)">
+          Undo
+        </button>
+        <button onClick={() => useGraphStore.getState().redo()} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">
+          Redo
+        </button>
+        <button
+          onClick={() => useGraphStore.getState().copySelection()}
+          disabled={!canCopy}
+          title="Copy node (Ctrl+C)"
+        >
+          Copy
+        </button>
+        <button
+          onClick={() => useGraphStore.getState().paste()}
+          disabled={!hasClipboard}
+          title="Paste (Ctrl+V)"
+        >
+          Paste
+        </button>
         <button onClick={() => useGraphStore.getState().clear()}>Clear</button>
         <button onClick={() => document.getElementById('file-import')?.click()}>Import</button>
         <button onClick={exportGraph}>Export</button>

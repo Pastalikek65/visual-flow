@@ -17,6 +17,32 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && typing) return;
+      if (mod && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        const s = useGraphStore.getState();
+        if (e.shiftKey) s.redo();
+        else s.undo();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        useGraphStore.getState().redo();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'c' && !typing) {
+        useGraphStore.getState().copySelection();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'v' && !typing) {
+        e.preventDefault();
+        useGraphStore.getState().paste();
+        return;
+      }
+      if (typing) return;
       if (e.key === 'Delete' || e.key === 'Backspace') {
         const sel = useGraphStore.getState().selection;
         if (!sel) return;

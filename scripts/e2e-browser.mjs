@@ -110,6 +110,33 @@ try {
   check('restored mul=65', v['mul1'] === '65', JSON.stringify(v));
   check('restored out=65', v['out1'] === '65', JSON.stringify(v));
 
+  console.log('» undo/redo + copy/paste');
+  const nodeCards = () => page.locator('.node-card').count();
+  const base = await nodeCards();
+  check('demo has 6 nodes', base === 6, String(base));
+
+  await page.locator('.node-id', { hasText: 'c1' }).click();
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Control+c');
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Control+v');
+  await page.waitForTimeout(800);
+  const afterPaste = await nodeCards();
+  check('paste adds a node', afterPaste === base + 1, `${base} -> ${afterPaste}`);
+
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(500);
+  const afterUndo = await nodeCards();
+  check('undo reverts paste', afterUndo === base, `${afterPaste} -> ${afterUndo}`);
+
+  await page.keyboard.press('Control+Shift+z');
+  await page.waitForTimeout(500);
+  const afterRedo = await nodeCards();
+  check('redo re-applies paste', afterRedo === base + 1, `${afterUndo} -> ${afterRedo}`);
+
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {
