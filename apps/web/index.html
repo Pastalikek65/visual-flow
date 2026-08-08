@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>visual-flow · Wasm dataflow engine</title>
+    <style>
+      :root {
+        --bg: #0e1117;
+        --panel: #161b26;
+        --panel-2: #1c2333;
+        --border: #2a3142;
+        --text: #dfe6f2;
+        --dim: #8a93a8;
+        --accent: #ef8354;
+        --math: #a4e8c2;
+        --logic: #a78bfa;
+        --io: #fbbf24;
+      }
+      * { box-sizing: border-box; }
+      html, body, #root { height: 100%; margin: 0; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
