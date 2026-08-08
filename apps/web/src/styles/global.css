@@ -304,6 +304,22 @@ body {
   box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
 }
 
+.port-incompatible .port-dot {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
+  animation: port-shake 0.3s ease;
+}
+
+.port-incompatible {
+  color: #ef4444 !important;
+}
+
+@keyframes port-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
 :root[data-theme='light'] .port-hover .port-dot {
   box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.25);
 }
@@ -403,6 +419,22 @@ body {
   color: #ff7b7b;
   white-space: pre-wrap;
   font-size: 12px;
+}
+
+.danger-btn {
+  margin-top: 14px;
+  padding: 7px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.danger-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
 }
 
 /* ---------- status ---------- */

@@ -1,6 +1,8 @@
 import { memo } from 'react';
 import type { PortDef } from 'flow-types';
+import { portCompatible, specFor } from 'flow-types';
 import { useUiStore } from '../store/uiStore';
+import { useGraphStore } from '../store/graphStore';
 
 const KIND_COLOR: Record<string, string> = {
   number: '#34d399',
@@ -21,8 +23,16 @@ export const Port = memo(function Port({
   index: number;
 }) {
   const { drag, hover, setDrag, setHover } = useUiStore();
+  const nodes = useGraphStore((s) => s.nodes);
   const active = drag?.side === 'out' && side === 'in';
   const hovering = hover?.nodeId === nodeId && hover.port === port.name && drag?.nodeId !== nodeId;
+  const dragNodeSpec = drag ? specFor(nodes[drag.nodeId]?.kind) : null;
+  const dragPortKind =
+    drag?.side === 'out' ? dragNodeSpec?.outputs.find((o) => o.name === drag.port)?.kind : null;
+  const incompatible =
+    hovering && dragPortKind !== undefined && dragPortKind !== null && !portCompatible(dragPortKind, port.kind);
+  const incompatibleNote = incompatible ? `incompatible: ${dragPortKind} → ${port.kind}` : undefined;
+
   const color = KIND_COLOR[port.kind] ?? '#f8fafc';
 
   const startDrag = (e: React.PointerEvent) => {
@@ -46,6 +56,7 @@ export const Port = memo(function Port({
     `port-${side}`,
     active ? 'port-active' : '',
     hovering ? 'port-hover' : '',
+    incompatible ? 'port-incompatible' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -57,7 +68,7 @@ export const Port = memo(function Port({
       onPointerDown={startDrag}
       onPointerEnter={hoverIn}
       onPointerLeave={hoverOut}
-      title={`${side} · ${port.kind}`}
+      title={incompatibleNote ?? `${side} · ${port.kind}`}
     >
       <span className="port-dot" style={{ background: color }} />
       <span className="port-name">{port.name}</span>

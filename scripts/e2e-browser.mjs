@@ -246,6 +246,63 @@ try {
   check('includes("0","0")=true', v['inc'] === 'true', JSON.stringify(v));
   check('startswith("0","0")=true', v['sw'] === 'true', JSON.stringify(v));
 
+  console.log('» incompatible port hover feedback');
+  const xOut = page.locator('.node-card:has(.node-id:text("x")) .port-out').first();
+  const incIn = page.locator('.node-card:has(.node-id:text("inc")) .port-in').first();
+  const xOutBox = await xOut.boundingBox();
+  const incInBox = await incIn.boundingBox();
+  const edgesBeforeHover = await page.locator('.edge-layer path').count();
+  check('port boxes found', !!xOutBox && !!incInBox);
+  await page.mouse.move(xOutBox.x + xOutBox.width / 2, xOutBox.y + xOutBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(incInBox.x + incInBox.width / 2, incInBox.y + incInBox.height / 2, { steps: 8 });
+  await page.waitForTimeout(300);
+  const incClass = await incIn.evaluate((el) => el.className);
+  check('incompatible hover class applied', incClass.includes('port-incompatible'), incClass);
+  const ghostStroke = await page
+    .locator('.ghost-line path')
+    .count()
+    .then((n) => (n ? page.locator('.ghost-line path').getAttribute('stroke') : null));
+  check('ghost line turns red', ghostStroke === '#ef4444', String(ghostStroke));
+  await page.keyboard.press('Escape');
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  const edgesAfterHover = await page.locator('.edge-layer path').count();
+  check('no edge created on incompatible drop', edgesAfterHover === edgesBeforeHover, `${edgesBeforeHover} -> ${edgesAfterHover}`);
+
+  console.log('» edge selection + remove in inspector');
+  const worldT = await page.evaluate(() => document.querySelector('.world')?.style.transform ?? '');
+  const wm = worldT.match(/translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([-\d.]+)\)/);
+  const [offX, offY, scaleK] = wm ? [parseFloat(wm[1]), parseFloat(wm[2]), parseFloat(wm[3])] : [40, 40, 1];
+  const firstEdge = page.locator('.edge-layer path').nth(2);
+  const t = await firstEdge.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2, rect: `${r.x.toFixed(1)},${r.y.toFixed(1)} ${r.width.toFixed(1)}x${r.height.toFixed(1)}` };
+  });
+  console.log(`  click edge rect=${t.rect}  screen transform is`, worldT);
+  const sx = t.x;
+  const sy = t.y;
+  const hitEl = await page.evaluate(([px, py]) => {
+    const el = document.elementFromPoint(px, py);
+    return el ? `${el.tagName}.${el.className}` : 'none';
+  }, [sx, sy]);
+  console.log(`  hit=${hitEl}`);
+  await page.mouse.move(sx, sy);
+  await page.mouse.click(sx, sy);
+  await page.waitForTimeout(300);
+  check('edge inspector visible', (await page.locator('.inspector-title', { hasText: 'Edge' }).count()) === 1);
+  const removeBtn = page.locator('.danger-btn').first();
+  check('remove edge button visible', (await removeBtn.count()) === 1);
+  const edgesBeforeRemove = await page.locator('.edge-layer path').count();
+  await removeBtn.click();
+  await page.waitForTimeout(600);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  const edgesAfterRemove = await page.locator('.edge-layer path').count();
+  check('edge removed from canvas', edgesAfterRemove === edgesBeforeRemove - 1, `${edgesBeforeRemove} -> ${edgesAfterRemove}`);
+  check('output input detached', v['out'] === '∅', JSON.stringify(v));
+  check('inspector cleared after remove', (await page.locator('.inspector-title', { hasText: 'Edge' }).count()) === 0);
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {

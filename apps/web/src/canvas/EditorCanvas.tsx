@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { specFor, portCompatible, type NodeSpec } from 'flow-types';
 import { useGraphStore } from '../store/graphStore';
 import { useUiStore } from '../store/uiStore';
@@ -92,15 +92,31 @@ export function EditorCanvas() {
     setHover(null);
     if (!hover) return;
     if (drag.nodeId === hover.nodeId) return;
-    const fromPort = specFor(drag.nodeId)?.outputs.find((o) => o.name === drag.port);
-    const toPort = specFor(hover.nodeId)?.inputs.find((i) => i.name === hover.port);
+    const dragNode = useGraphStore.getState().nodes[drag.nodeId];
+    const hoverNode = useGraphStore.getState().nodes[hover.nodeId];
+    const fromPort = specFor(dragNode?.kind)?.outputs.find((o) => o.name === drag.port);
+    const toPort = specFor(hoverNode?.kind)?.inputs.find((i) => i.name === hover.port);
     if (!fromPort || !toPort) return;
     if (!portCompatible(fromPort.kind, toPort.kind)) return;
-    const g = useUiStore.getState();
     const graph = useGraphStore.getState();
     if (cycleCheck({ nodes: graph.nodes, edges: graph.edges }, drag.nodeId, hover.nodeId)) return;
-    connect(drag.nodeId, drag.port, hover.nodeId, hover.port);
+    connect(dragNode.id, drag.port, hoverNode.id, hover.port);
   }, [drag, hover, connect, setDrag, setHover]);
+
+  const ghostColor = useMemo(() => {
+    if (!drag || !cursor) return null;
+    if (hover) {
+      const dragNode = nodes[drag.nodeId];
+      const hoverNode = nodes[hover.nodeId];
+      const fromPort = specFor(dragNode?.kind)?.outputs.find((o) => o.name === drag.port);
+      const toPort = specFor(hoverNode?.kind)?.inputs.find((i) => i.name === hover.port);
+      if (!dragNode || !hoverNode || !fromPort || !toPort) return '#ef8354';
+      if (drag.nodeId === hover.nodeId) return '#ef4444';
+      if (!portCompatible(fromPort.kind, toPort.kind)) return '#ef4444';
+      if (cycleCheck({ nodes, edges }, dragNode.id, hoverNode.id)) return '#ef4444';
+    }
+    return '#ef8354';
+  }, [drag, hover, cursor, nodes, edges]);
 
   useEffect(() => {
     const up = () => commitConnection();
@@ -146,9 +162,9 @@ export function EditorCanvas() {
           selected={selection?.kind === 'edge' ? selection.id : null}
           onSelectEdge={(id) => select({ kind: 'edge', id })}
         />
-        {ghostD && (
-          <svg style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            <path d={ghostD} fill="none" stroke="#ef8354" strokeWidth={2} strokeDasharray="6 4" opacity={0.9} />
+        {ghostD && ghostColor && (
+          <svg className="ghost-line" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            <path d={ghostD} fill="none" stroke={ghostColor} strokeWidth={2} strokeDasharray="6 4" opacity={0.9} />
           </svg>
         )}
         {Object.values(nodes).map((n) => (

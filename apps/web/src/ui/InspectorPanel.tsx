@@ -8,6 +8,7 @@ export function InspectorPanel() {
   const selection = useGraphStore((s) => s.selection);
   const node = useGraphStore((s) => (s.selection?.kind === 'node' ? s.nodes[s.selection.id] : undefined));
   const edge = useGraphStore((s) => (s.selection?.kind === 'edge' ? s.edges[s.selection.id] : undefined));
+  const removeEdge = useGraphStore((s) => s.removeEdge);
   const values = useEngineStore((s) => s.values);
   const error = useEngineStore((s) => s.error);
   const lastRunMs = useEngineStore((s) => s.runMs);
@@ -45,6 +46,13 @@ export function InspectorPanel() {
             <span>to</span>
             <code>{edge.to}.{edge.toPort}</code>
           </div>
+          <button
+            className="danger-btn"
+            onClick={() => removeEdge(edge.id)}
+            title="Remove this edge (undo with Ctrl+Z)"
+          >
+            Remove edge
+          </button>
         </div>
       )}
 
