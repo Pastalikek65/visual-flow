@@ -1,0 +1,30 @@
+import { describe, it, expect } from 'vitest';
+import { REGISTRY, specFor } from './registry';
+import { portCompatible } from './node';
+
+describe('registry', () => {
+  it('contains the full builtin node set', () => {
+    const ids = REGISTRY.map((s) => s.id);
+    for (const expected of ['add', 'sub', 'mul', 'div', 'pow', 'sin', 'cos', 'min', 'max', 'and', 'or', 'not', 'equal', 'greater', 'less', 'ge', 'ifelse', 'constant', 'slider', 'output']) {
+      expect(ids).toContain(expected);
+    }
+  });
+
+  it('has unique ids', () => {
+    const ids = REGISTRY.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('specFor resolves', () => {
+    expect(specFor('add')?.label).toBe('Add');
+    expect(specFor('nope')).toBeUndefined();
+  });
+
+  it('port compatibility rules', () => {
+    expect(portCompatible('number', 'number')).toBe(true);
+    expect(portCompatible('bool', 'bool')).toBe(true);
+    expect(portCompatible('number', 'bool')).toBe(false);
+    expect(portCompatible('any', 'number')).toBe(true);
+    expect(portCompatible('number', 'any')).toBe(true);
+  });
+});
