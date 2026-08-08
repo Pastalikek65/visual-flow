@@ -205,6 +205,47 @@ try {
   console.log('  values:', JSON.stringify(v));
   check('concat=Hi world', v['cc1'] === 'Hi world', JSON.stringify(v));
 
+  console.log('» extended node library via Import');
+  const libraryGraph = {
+    nodes: [
+      { id: 'x', kind: 'constant', params: { value: 15 }, x: 40, y: 40 },
+      { id: 'cl', kind: 'clamp', params: {}, x: 240, y: 40 },
+      { id: 'lp', kind: 'lerp', params: {}, x: 240, y: 180 },
+      { id: 'md', kind: 'mod', params: {}, x: 240, y: 320 },
+      { id: 'gd', kind: 'gcd', params: {}, x: 240, y: 460 },
+      { id: 'pn', kind: 'parsenum', params: {}, x: 460, y: 40 },
+      { id: 'sb', kind: 'substring', params: {}, x: 460, y: 180 },
+      { id: 'tr', kind: 'trim', params: {}, x: 460, y: 320 },
+      { id: 'rp', kind: 'replace', params: {}, x: 460, y: 460 },
+      { id: 'inc', kind: 'includes', params: {}, x: 680, y: 40 },
+      { id: 'sw', kind: 'startswith', params: {}, x: 680, y: 180 },
+      { id: 'out', kind: 'output', params: {}, x: 900, y: 40 },
+    ],
+    edges: [
+      { id: 'we1', from: 'x', fromPort: 'value', to: 'cl', toPort: 'a' },
+      { id: 'we2', from: 'x', fromPort: 'value', to: 'lp', toPort: 'a' },
+      { id: 'we3', from: 'cl', fromPort: 'out', to: 'out', toPort: 'in' },
+    ],
+  };
+  await page.locator('#file-import').setInputFiles({
+    name: 'lib-graph.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(libraryGraph)),
+  });
+  await page.waitForTimeout(1200);
+  v = await readNodeValues();
+  console.log('  values:', JSON.stringify(v));
+  check('clamp(15,0,0)=0', v['cl'] === '0', JSON.stringify(v));
+  check('lerp(15,0,0)=15', v['lp'] === '15', JSON.stringify(v));
+  check('mod(15,0)=NaN', v['md'] === 'NaN', JSON.stringify(v));
+  check('gcd unbound=0', v['gd'] === '0', JSON.stringify(v));
+  check('parsenum empty=0', v['pn'] === '0', JSON.stringify(v));
+  check('substring empty=""', v['sb'] === '', JSON.stringify(v));
+  check('trim coerces to "0"', v['tr'] === '0', JSON.stringify(v));
+  check('replace of "0" is "0"', v['rp'] === '0', JSON.stringify(v));
+  check('includes("0","0")=true', v['inc'] === 'true', JSON.stringify(v));
+  check('startswith("0","0")=true', v['sw'] === 'true', JSON.stringify(v));
+
   if (consoleErrors.length) {
     check('no console errors', false, consoleErrors.slice(0, 5).join('\n      '));
   } else {

@@ -33,6 +33,12 @@ export const REGISTRY: NodeSpec[] = [
   { id: 'floor', label: 'Floor', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
   { id: 'ceil', label: 'Ceil', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
   { id: 'round', label: 'Round', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'mod', label: 'Modulo', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
+  { id: 'clamp', label: 'Clamp', category: 'math', color: math, inputs: [N('a'), N('b'), N('c')], outputs: [N('out')], params: [] },
+  { id: 'lerp', label: 'Lerp', category: 'math', color: math, inputs: [N('a'), N('b'), N('c')], outputs: [N('out')], params: [] },
+  { id: 'atan2', label: 'Atan2', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
+  { id: 'exp', label: 'Exp', category: 'math', color: math, inputs: [N('x')], outputs: [N('out')], params: [] },
+  { id: 'gcd', label: 'GCD', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
   { id: 'min', label: 'Min', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
   { id: 'max', label: 'Max', category: 'math', color: math, inputs: [N('a'), N('b')], outputs: [N('out')], params: [] },
   { id: 'and', label: 'AND', category: 'logic', color: logic, inputs: [B('a'), B('b')], outputs: [B('out')], params: [] },
@@ -54,6 +60,22 @@ export const REGISTRY: NodeSpec[] = [
   { id: 'lowercase', label: 'Lowercase', category: 'text', color: text, inputs: [S('text')], outputs: [S('out')], params: [] },
   { id: 'length', label: 'Length', category: 'text', color: text, inputs: [S('text')], outputs: [N('out')], params: [] },
   { id: 'stringify', label: 'To String', category: 'text', color: text, inputs: [A('in')], outputs: [S('out')], params: [] },
+  {
+    id: 'substring', label: 'Substring', category: 'text', color: text,
+    inputs: [S('text'), N('start'), N('len')],
+    outputs: [S('out')],
+    params: [],
+  },
+  { id: 'trim', label: 'Trim', category: 'text', color: text, inputs: [S('text')], outputs: [S('out')], params: [] },
+  {
+    id: 'replace', label: 'Replace', category: 'text', color: text,
+    inputs: [S('text'), S('needle'), S('replacement')],
+    outputs: [S('out')],
+    params: [],
+  },
+  { id: 'includes', label: 'Includes', category: 'text', color: text, inputs: [S('text'), S('needle')], outputs: [B('out')], params: [] },
+  { id: 'startswith', label: 'Starts With', category: 'text', color: text, inputs: [S('text'), S('prefix')], outputs: [B('out')], params: [] },
+  { id: 'parsenum', label: 'Parse Number', category: 'text', color: text, inputs: [S('text')], outputs: [N('out')], params: [] },
 ];
 
 export function specFor(kind: string): NodeSpec | undefined {

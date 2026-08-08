@@ -5,7 +5,7 @@ import { portCompatible } from './node';
 describe('registry', () => {
   it('contains the full builtin node set', () => {
     const ids = REGISTRY.map((s) => s.id);
-    for (const expected of ['add', 'sub', 'mul', 'div', 'pow', 'sin', 'cos', 'tan', 'abs', 'sqrt', 'log', 'floor', 'ceil', 'round', 'min', 'max', 'and', 'or', 'not', 'equal', 'greater', 'less', 'ge', 'ifelse', 'constant', 'slider', 'output', 'text', 'concat', 'uppercase', 'lowercase', 'length', 'stringify']) {
+    for (const expected of ['add', 'sub', 'mul', 'div', 'pow', 'sin', 'cos', 'tan', 'abs', 'sqrt', 'log', 'floor', 'ceil', 'round', 'mod', 'clamp', 'lerp', 'atan2', 'exp', 'gcd', 'min', 'max', 'and', 'or', 'not', 'equal', 'greater', 'less', 'ge', 'ifelse', 'constant', 'slider', 'output', 'text', 'concat', 'uppercase', 'lowercase', 'length', 'stringify', 'substring', 'trim', 'replace', 'includes', 'startswith', 'parsenum']) {
       expect(ids).toContain(expected);
     }
   });

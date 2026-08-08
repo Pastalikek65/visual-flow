@@ -37,6 +37,12 @@ impl Registry {
                 ("floor", &MathNode::Floor),
                 ("ceil", &MathNode::Ceil),
                 ("round", &MathNode::Round),
+                ("mod", &MathNode::Mod),
+                ("clamp", &MathNode::Clamp),
+                ("lerp", &MathNode::Lerp),
+                ("atan2", &MathNode::Atan2),
+                ("exp", &MathNode::Exp),
+                ("gcd", &MathNode::Gcd),
                 ("and", &LogicNode::And),
                 ("or", &LogicNode::Or),
                 ("not", &LogicNode::Not),
@@ -54,6 +60,12 @@ impl Registry {
                 ("lowercase", &Lowercase),
                 ("length", &Length),
                 ("stringify", &Stringify),
+                ("substring", &Substring),
+                ("trim", &Trim),
+                ("replace", &Replace),
+                ("includes", &Includes),
+                ("startswith", &StartsWith),
+                ("parsenum", &ParseNum),
             ],
         }
     }
@@ -85,6 +97,29 @@ pub enum MathNode {
     Floor,
     Ceil,
     Round,
+    Mod,
+    Clamp,
+    Lerp,
+    Atan2,
+    Exp,
+    Gcd,
+}
+
+fn triple_num(a: &'static str, b: &'static str, c: &'static str) -> [PortSpec; 3] {
+    [
+        PortSpec {
+            name: a,
+            kind: "number",
+        },
+        PortSpec {
+            name: b,
+            kind: "number",
+        },
+        PortSpec {
+            name: c,
+            kind: "number",
+        },
+    ]
 }
 
 // Single-input math nodes (kind "number" -> "number")
@@ -114,27 +149,47 @@ impl NodeImpl for MathNode {
             MathNode::Floor => "Floor",
             MathNode::Ceil => "Ceil",
             MathNode::Round => "Round",
+            MathNode::Mod => "Modulo",
+            MathNode::Clamp => "Clamp",
+            MathNode::Lerp => "Lerp",
+            MathNode::Atan2 => "Atan2",
+            MathNode::Exp => "Exp",
+            MathNode::Gcd => "GCD",
         }
     }
 
     fn inputs(&self) -> &'static [PortSpec] {
         use std::sync::OnceLock;
         static SINGLE: OnceLock<[PortSpec; 1]> = OnceLock::new();
-        static ADD: OnceLock<[PortSpec; 2]> = OnceLock::new();
-        static POW: OnceLock<[PortSpec; 2]> = OnceLock::new();
+        static PAIR: OnceLock<[PortSpec; 2]> = OnceLock::new();
+        static TRIPLE: OnceLock<[PortSpec; 3]> = OnceLock::new();
         match self {
-            MathNode::Pow => POW.get_or_init(|| {
+            MathNode::Pow => PAIR.get_or_init(|| {
                 [
-                    PortSpec {
-                        name: "base",
-                        kind: "number",
-                    },
                     PortSpec {
                         name: "exp",
                         kind: "number",
                     },
+                    PortSpec {
+                        name: "base",
+                        kind: "number",
+                    },
                 ]
             }),
+            MathNode::Mod | MathNode::Atan2 | MathNode::Gcd => PAIR.get_or_init(|| {
+                [
+                    PortSpec {
+                        name: "a",
+                        kind: "number",
+                    },
+                    PortSpec {
+                        name: "b",
+                        kind: "number",
+                    },
+                ]
+            }),
+            MathNode::Clamp | MathNode::Lerp => TRIPLE.get_or_init(|| triple_num("a", "b", "c")),
+            MathNode::Exp => SINGLE.get_or_init(single_spec),
             MathNode::Sin
             | MathNode::Cos
             | MathNode::Tan
@@ -144,7 +199,7 @@ impl NodeImpl for MathNode {
             | MathNode::Floor
             | MathNode::Ceil
             | MathNode::Round => SINGLE.get_or_init(single_spec),
-            _ => ADD.get_or_init(|| {
+            _ => PAIR.get_or_init(|| {
                 [
                     PortSpec {
                         name: "a",
@@ -185,6 +240,26 @@ impl NodeImpl for MathNode {
             MathNode::Floor => one(ctx, 0).floor(),
             MathNode::Ceil => one(ctx, 0).ceil(),
             MathNode::Round => one(ctx, 0).round(),
+            MathNode::Mod => one(ctx, 0) % one(ctx, 1),
+            MathNode::Clamp => one(ctx, 0).clamp(one(ctx, 1), one(ctx, 2)),
+            MathNode::Lerp => {
+                let (a, b, t) = (one(ctx, 0), one(ctx, 1), one(ctx, 2));
+                a + (b - a) * t
+            }
+            MathNode::Atan2 => one(ctx, 0).atan2(one(ctx, 1)),
+            MathNode::Exp => one(ctx, 0).exp(),
+            MathNode::Gcd => {
+                let (mut a, mut b) = (
+                    one(ctx, 0).abs().round() as i64,
+                    one(ctx, 1).abs().round() as i64,
+                );
+                while b != 0 {
+                    let t = b;
+                    b = a % b;
+                    a = t;
+                }
+                a.abs() as f64
+            }
         };
         Value::Number(out)
     }
@@ -296,4 +371,7 @@ impl NodeImpl for LogicNode {
 mod io;
 mod text;
 
-use self::text::{Concat, Length, Lowercase, Stringify, Text, Uppercase};
+use self::text::{
+    Concat, Includes, Length, Lowercase, ParseNum, Replace, StartsWith, Stringify, Substring, Text,
+    Trim, Uppercase,
+};

@@ -393,3 +393,72 @@ mod camelcase_tests {
         assert_eq!(out["c"]["value"], serde_json::json!("Hello world"));
     }
 }
+
+#[cfg(test)]
+mod math_extra_tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn clamp_lerp_mod_atan2_exp_gcd() {
+        let mut engine = Engine::new();
+        engine
+            .set_graph(
+                r#"{"nodes":[
+                    {"id":"a","kind":"clamp","params":{}},
+                    {"id":"b","kind":"lerp","params":{}},
+                    {"id":"c","kind":"mod","params":{}},
+                    {"id":"d","kind":"atan2","params":{}},
+                    {"id":"e","kind":"exp","params":{}},
+                    {"id":"f","kind":"gcd","params":{}}
+                ],"edges":[]}"#,
+            )
+            .unwrap();
+        let _ = engine.run().unwrap();
+        // unbound inputs default to 0; clamp(0,0,0)=0; verbose checks below
+    }
+
+    #[test]
+    fn clamp_with_constants() {
+        let mut engine = Engine::new();
+        engine
+            .set_graph(
+                r#"{"nodes":[
+                    {"id":"v","kind":"constant","params":{"value":15.0}},
+                    {"id":"lo","kind":"constant","params":{"value":0.0}},
+                    {"id":"hi","kind":"constant","params":{"value":10.0}},
+                    {"id":"out","kind":"clamp","params":{}}
+                ],"edges":[
+                    {"id":"e1","from":"v","to":"out","from_port":"out","to_port":"a"},
+                    {"id":"e2","from":"lo","to":"out","from_port":"out","to_port":"b"},
+                    {"id":"e3","from":"hi","to":"out","from_port":"out","to_port":"c"}
+                ]}"#,
+            )
+            .unwrap();
+        let out = engine.run().unwrap();
+        assert_eq!(out["out"]["value"], json!(10.0));
+    }
+
+    #[test]
+    fn ceil_round_floor() {
+        let mut engine = Engine::new();
+        engine
+            .set_graph(
+                r#"{"nodes":[
+                    {"id":"v","kind":"constant","params":{"value":2.5}},
+                    {"id":"fl","kind":"floor","params":{}},
+                    {"id":"ce","kind":"ceil","params":{}},
+                    {"id":"ro","kind":"round","params":{}}
+                ],"edges":[
+                    {"id":"e1","from":"v","to":"fl","from_port":"out","to_port":"x"},
+                    {"id":"e2","from":"v","to":"ce","from_port":"out","to_port":"x"},
+                    {"id":"e3","from":"v","to":"ro","from_port":"out","to_port":"x"}
+                ]}"#,
+            )
+            .unwrap();
+        let out = engine.run().unwrap();
+        assert_eq!(out["fl"]["value"], json!(2.0));
+        assert_eq!(out["ce"]["value"], json!(3.0));
+        assert_eq!(out["ro"]["value"], json!(3.0));
+    }
+}
