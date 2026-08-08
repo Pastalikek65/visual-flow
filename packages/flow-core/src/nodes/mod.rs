@@ -20,41 +20,41 @@ pub struct Registry {
 impl Registry {
     pub fn builtin() -> Self {
         Registry {
-kinds: &[
-            ("add", &MathNode::Add),
-            ("sub", &MathNode::Sub),
-            ("mul", &MathNode::Mul),
-            ("div", &MathNode::Div),
-            ("pow", &MathNode::Pow),
-            ("sin", &MathNode::Sin),
-            ("cos", &MathNode::Cos),
-            ("tan", &MathNode::Tan),
-            ("min", &MathNode::Min),
-            ("max", &MathNode::Max),
-            ("abs", &MathNode::Abs),
-            ("sqrt", &MathNode::Sqrt),
-            ("log", &MathNode::Log),
-            ("floor", &MathNode::Floor),
-            ("ceil", &MathNode::Ceil),
-            ("round", &MathNode::Round),
-            ("and", &LogicNode::And),
-            ("or", &LogicNode::Or),
-            ("not", &LogicNode::Not),
-            ("equal", &LogicNode::Equal),
-            ("greater", &LogicNode::Greater),
-            ("less", &LogicNode::Less),
-            ("ge", &LogicNode::Ge),
-            ("ifelse", &LogicNode::IfElse),
-            ("constant", &io::Constant),
-            ("slider", &io::Slider),
-            ("output", &io::Output),
-            ("text", &Text),
-            ("concat", &Concat),
-            ("uppercase", &Uppercase),
-            ("lowercase", &Lowercase),
-            ("length", &Length),
-            ("stringify", &Stringify),
-        ],
+            kinds: &[
+                ("add", &MathNode::Add),
+                ("sub", &MathNode::Sub),
+                ("mul", &MathNode::Mul),
+                ("div", &MathNode::Div),
+                ("pow", &MathNode::Pow),
+                ("sin", &MathNode::Sin),
+                ("cos", &MathNode::Cos),
+                ("tan", &MathNode::Tan),
+                ("min", &MathNode::Min),
+                ("max", &MathNode::Max),
+                ("abs", &MathNode::Abs),
+                ("sqrt", &MathNode::Sqrt),
+                ("log", &MathNode::Log),
+                ("floor", &MathNode::Floor),
+                ("ceil", &MathNode::Ceil),
+                ("round", &MathNode::Round),
+                ("and", &LogicNode::And),
+                ("or", &LogicNode::Or),
+                ("not", &LogicNode::Not),
+                ("equal", &LogicNode::Equal),
+                ("greater", &LogicNode::Greater),
+                ("less", &LogicNode::Less),
+                ("ge", &LogicNode::Ge),
+                ("ifelse", &LogicNode::IfElse),
+                ("constant", &io::Constant),
+                ("slider", &io::Slider),
+                ("output", &io::Output),
+                ("text", &Text),
+                ("concat", &Concat),
+                ("uppercase", &Uppercase),
+                ("lowercase", &Lowercase),
+                ("length", &Length),
+                ("stringify", &Stringify),
+            ],
         }
     }
 
@@ -135,10 +135,15 @@ impl NodeImpl for MathNode {
                     },
                 ]
             }),
-            MathNode::Sin | MathNode::Cos | MathNode::Tan | MathNode::Abs | MathNode::Sqrt
-            | MathNode::Log | MathNode::Floor | MathNode::Ceil | MathNode::Round => {
-                SINGLE.get_or_init(single_spec)
-            }
+            MathNode::Sin
+            | MathNode::Cos
+            | MathNode::Tan
+            | MathNode::Abs
+            | MathNode::Sqrt
+            | MathNode::Log
+            | MathNode::Floor
+            | MathNode::Ceil
+            | MathNode::Round => SINGLE.get_or_init(single_spec),
             _ => ADD.get_or_init(|| {
                 [
                     PortSpec {
