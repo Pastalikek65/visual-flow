@@ -55,3 +55,6 @@ jobs:
 
       - name: vitest
         run: npm run test:ts
+
+      - name: wasm bridge smoke (node)
+        run: npm run test:wasm

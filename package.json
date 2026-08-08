@@ -19,6 +19,7 @@
     "build": "bash scripts/build.sh",
     "typecheck": "tsc --noEmit -p packages/flow-types && tsc --noEmit -p packages/flow-engine && tsc --noEmit -p apps/web",
     "test:rust": "cargo test --workspace",
+    "test:wasm": "bash scripts/test-wasm-bridge.sh",
     "test:ts": "vitest run",
     "test": "npm run test:rust && npm run test:ts",
     "check": "bash scripts/checks.sh"

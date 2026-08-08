@@ -29,9 +29,9 @@ pub struct EdgeDef {
     pub id: EdgeId,
     pub from: NodeId,
     pub to: NodeId,
-    #[serde(default = "default_port")]
+    #[serde(default = "default_port", alias = "fromPort")]
     pub from_port: String,
-    #[serde(default = "default_port")]
+    #[serde(default = "default_port", alias = "toPort")]
     pub to_port: String,
 }
 
@@ -52,10 +52,15 @@ pub struct WireGraph {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct WirePatch {
+    #[serde(alias = "nodesAdded")]
     pub nodes_added: Vec<NodeDef>,
+    #[serde(alias = "nodesRemoved")]
     pub nodes_removed: Vec<NodeId>,
+    #[serde(alias = "nodesChanged")]
     pub nodes_changed: Vec<NodeDef>,
+    #[serde(alias = "edgesAdded")]
     pub edges_added: Vec<EdgeDef>,
+    #[serde(alias = "edgesRemoved")]
     pub edges_removed: Vec<EdgeId>,
 }
 

@@ -9,4 +9,4 @@ wasm-gen/
 .env.*
 !.env.example
 .vite/
-coverage/
+coverage/tmp-wasm/
